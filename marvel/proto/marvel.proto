@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+service MarvelService {
+    rpc GetCharacters(CharacterRequest) returns (CharacterResponse);
+    rpc GetCacheStats(EmptyRequest) returns (CacheStatsResponse);
+}
+
+message CharacterRequest {
+  string query = 1; // Filter by character name.
+  int32 offset = 2; // Pagination offset.
+  int32 limit = 3;  // Limit the number of results.
+}
+
+message Url {
+  string type = 1;
+  string url = 2;
+}
+
+message Image {
+  string path = 1;
+  string extension = 2;
+}
+
+message ComicSummary {
+  string resourceURI = 1;
+  string name = 2;
+}
+
+message StorySummary {
+  string resourceURI = 1;
+  string name = 2;
+  string type = 3;
+}
+
+message EventSummary {
+  string resourceURI = 1;
+  string name = 2;
+}
+
+message SeriesSummary {
+  string resourceURI = 1;
+  string name = 2;
+}
+
+message ResourceList {
+  int32 available = 1;
+  int32 returned = 2;
+  string collectionURI = 3;
+  repeated ComicSummary comics = 4;
+  repeated StorySummary stories = 5;
+  repeated EventSummary events = 6;
+  repeated SeriesSummary series = 7;
+}
+
+message Character {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  string modified = 4;
+  string resourceURI = 5;
+  repeated Url urls = 6;
+  Image thumbnail = 7;
+  ResourceList comics = 8;
+  ResourceList stories = 9;
+  ResourceList events = 10;
+  ResourceList series = 11;
+}
+
+message CharacterResponse {
+  int32 code = 1;
+  string status = 2;
+  string copyright = 3;
+  string attributionText = 4;
+  string attributionHTML = 5;
+  string etag = 6;
+  int32 offset = 7;
+  int32 limit = 8;
+  int32 total = 9;
+  int32 count = 10;
+  repeated Character characters = 11;
+}
+
+message EmptyRequest {}
+
+message CacheStatsResponse {
+    int32 hits = 1;
+    int32 misses = 2;
+    int32 total_requests = 3;
+    float hit_ratio = 4;
+}

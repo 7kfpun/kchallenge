@@ -1,0 +1,6 @@
+grpcio-tools~=1.67.1
+grpcio~=1.67.1
+python-dotenv~=1.0.1
+requests~=2.32.3
+cachetools~=5.3.2
+httpx

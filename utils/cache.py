@@ -2,53 +2,48 @@
 Cache module for Marvel API.
 """
 
-import logging
+from collections import OrderedDict
 import time
+import logging
 
 logger = logging.getLogger(__name__)
 
 
 class Cache:
     """
-    Cache implementation.
+    Cache.
     """
 
     def __init__(self, maxsize=1000, ttl=300):
         """
-        Custom Cache implementation.
+        Initialize the cache with hit and miss counters.
         :param maxsize: Maximum number of items in the cache.
         :param ttl: Time-to-live for cache entries in seconds.
         """
-        self.cache = {}
-        self.ttl = ttl
+        self.store = OrderedDict()
         self.maxsize = maxsize
+        self.ttl = ttl
         self.hit_count = 0
         self.miss_count = 0
 
-    def _evict_if_needed(self):
+    def get(self, key: str):
         """
-        Evict the oldest items if the cache exceeds maxsize.
+        Retrieve a value from the cache if it exists and is not expired.
+        Increments hit or miss counters.
         """
-        while len(self.cache) > self.maxsize:
-            oldest_key = min(self.cache, key=lambda k: self.cache[k]["timestamp"])
-            logger.info("Evicting key: %s", oldest_key)
-            del self.cache[oldest_key]
-
-    def get(self, key):
-        """
-        Retrieve an item from the cache.
-        :param key: Cache key.
-        :return: Cached value or None if not found or expired.
-        """
-        entry = self.cache.get(key)
-        if entry:
-            if time.time() - entry["timestamp"] < self.ttl:
+        if key in self.store:
+            value, timestamp = self.store[key]
+            if time.time() - timestamp < self.ttl:
                 self.hit_count += 1
+                self.store.move_to_end(key)
                 logger.info("Cache hit for key: %s", key)
-                return entry["value"]
+                return value
 
-            logger.info("Cache expired for key: %s", key)
-            del self.cache[key]
+            # Remove expired entry
+            del self.store[key]
+            self.miss_count += 1
+            logger.info("Cache miss (expired) for key: %s", key)
+            return None
 
         self.miss_count += 1
         logger.info("Cache miss for key: %s", key)
@@ -56,12 +51,23 @@ class Cache:
 
     def set(self, key, value):
         """
-        Add an item to the cache.
-        :param key: Cache key.
-        :param value: Cache value.
+        Add or update a value in the cache with the current timestamp.
+        Evicts the oldest item if the cache exceeds maxsize.
         """
-        self.cache[key] = {"value": value, "timestamp": time.time()}
-        self._evict_if_needed()
+        if key in self.store:
+            self.store.move_to_end(key)
+        self.store[key] = (value, time.time())
+
+        if len(self.store) > self.maxsize:
+            # Evict the oldest entry
+            evicted_key, _ = self.store.popitem(last=False)
+            logger.info("Evicted key: %s", evicted_key)
+
+    def keys(self):
+        """
+        Return all keys in the cache.
+        """
+        return list(self.store.keys())
 
     def stats(self):
         """
@@ -79,9 +85,9 @@ class Cache:
 
     def clear(self):
         """
-        Clear the cache and reset stats.
+        Clear the cache and reset counters.
         """
-        self.cache.clear()
+        self.store.clear()
         self.hit_count = 0
         self.miss_count = 0
         logger.info("Cache cleared.")

@@ -9,48 +9,52 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
-
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC, 5, 27, 2, "", "marvel.proto"
+    _runtime_version.Domain.PUBLIC,
+    5,
+    27,
+    2,
+    '',
+    'marvel.proto'
 )
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x0cmarvel.proto"@\n\x10\x43haracterRequest\x12\r\n\x05query\x18\x01 \x01(\t\x12\x0e\n\x06offset\x18\x02 \x01(\x05\x12\r\n\x05limit\x18\x03 \x01(\x05" \n\x03Url\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t"(\n\x05Image\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x11\n\textension\x18\x02 \x01(\t"1\n\x0c\x43omicSummary\x12\x13\n\x0bresourceURI\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t"?\n\x0cStorySummary\x12\x13\n\x0bresourceURI\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t"1\n\x0c\x45ventSummary\x12\x13\n\x0bresourceURI\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t"2\n\rSeriesSummary\x12\x13\n\x0bresourceURI\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t"\xc8\x01\n\x0cResourceList\x12\x11\n\tavailable\x18\x01 \x01(\x05\x12\x10\n\x08returned\x18\x02 \x01(\x05\x12\x15\n\rcollectionURI\x18\x03 \x01(\t\x12\x1d\n\x06\x63omics\x18\x04 \x03(\x0b\x32\r.ComicSummary\x12\x1e\n\x07stories\x18\x05 \x03(\x0b\x32\r.StorySummary\x12\x1d\n\x06\x65vents\x18\x06 \x03(\x0b\x32\r.EventSummary\x12\x1e\n\x06series\x18\x07 \x03(\x0b\x32\x0e.SeriesSummary"\x8d\x02\n\tCharacter\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x10\n\x08modified\x18\x04 \x01(\t\x12\x13\n\x0bresourceURI\x18\x05 \x01(\t\x12\x12\n\x04urls\x18\x06 \x03(\x0b\x32\x04.Url\x12\x19\n\tthumbnail\x18\x07 \x01(\x0b\x32\x06.Image\x12\x1d\n\x06\x63omics\x18\x08 \x01(\x0b\x32\r.ResourceList\x12\x1e\n\x07stories\x18\t \x01(\x0b\x32\r.ResourceList\x12\x1d\n\x06\x65vents\x18\n \x01(\x0b\x32\r.ResourceList\x12\x1d\n\x06series\x18\x0b \x01(\x0b\x32\r.ResourceList"\xe1\x01\n\x11\x43haracterResponse\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\t\x12\x11\n\tcopyright\x18\x03 \x01(\t\x12\x17\n\x0f\x61ttributionText\x18\x04 \x01(\t\x12\x17\n\x0f\x61ttributionHTML\x18\x05 \x01(\t\x12\x0c\n\x04\x65tag\x18\x06 \x01(\t\x12\x0e\n\x06offset\x18\x07 \x01(\x05\x12\r\n\x05limit\x18\x08 \x01(\x05\x12\r\n\x05total\x18\t \x01(\x05\x12\r\n\x05\x63ount\x18\n \x01(\x05\x12\x1e\n\ncharacters\x18\x0b \x03(\x0b\x32\n.Character"\x0e\n\x0c\x45mptyRequest"]\n\x12\x43\x61\x63heStatsResponse\x12\x0c\n\x04hits\x18\x01 \x01(\x05\x12\x0e\n\x06misses\x18\x02 \x01(\x05\x12\x16\n\x0etotal_requests\x18\x03 \x01(\x05\x12\x11\n\thit_ratio\x18\x04 \x01(\x02\x32|\n\rMarvelService\x12\x36\n\rGetCharacters\x12\x11.CharacterRequest\x1a\x12.CharacterResponse\x12\x33\n\rGetCacheStats\x12\r.EmptyRequest\x1a\x13.CacheStatsResponseb\x06proto3'
-)
+
+
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmarvel.proto\"\xc4\x01\n\x10\x43haracterRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x18\n\x10name_starts_with\x18\x02 \x01(\t\x12\x16\n\x0emodified_since\x18\x03 \x01(\t\x12\x0e\n\x06\x63omics\x18\x04 \x03(\x05\x12\x0e\n\x06series\x18\x05 \x03(\x05\x12\x0e\n\x06\x65vents\x18\x06 \x03(\x05\x12\x0f\n\x07stories\x18\x07 \x03(\x05\x12\x10\n\x08order_by\x18\x08 \x01(\t\x12\r\n\x05limit\x18\t \x01(\x05\x12\x0e\n\x06offset\x18\n \x01(\x05\" \n\x03Url\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\"(\n\x05Image\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x11\n\textension\x18\x02 \x01(\t\"1\n\x0c\x43omicSummary\x12\x13\n\x0bresourceURI\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"?\n\x0cStorySummary\x12\x13\n\x0bresourceURI\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\"1\n\x0c\x45ventSummary\x12\x13\n\x0bresourceURI\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"2\n\rSeriesSummary\x12\x13\n\x0bresourceURI\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\xc8\x01\n\x0cResourceList\x12\x11\n\tavailable\x18\x01 \x01(\x05\x12\x10\n\x08returned\x18\x02 \x01(\x05\x12\x15\n\rcollectionURI\x18\x03 \x01(\t\x12\x1d\n\x06\x63omics\x18\x04 \x03(\x0b\x32\r.ComicSummary\x12\x1e\n\x07stories\x18\x05 \x03(\x0b\x32\r.StorySummary\x12\x1d\n\x06\x65vents\x18\x06 \x03(\x0b\x32\r.EventSummary\x12\x1e\n\x06series\x18\x07 \x03(\x0b\x32\x0e.SeriesSummary\"\x8d\x02\n\tCharacter\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x10\n\x08modified\x18\x04 \x01(\t\x12\x13\n\x0bresourceURI\x18\x05 \x01(\t\x12\x12\n\x04urls\x18\x06 \x03(\x0b\x32\x04.Url\x12\x19\n\tthumbnail\x18\x07 \x01(\x0b\x32\x06.Image\x12\x1d\n\x06\x63omics\x18\x08 \x01(\x0b\x32\r.ResourceList\x12\x1e\n\x07stories\x18\t \x01(\x0b\x32\r.ResourceList\x12\x1d\n\x06\x65vents\x18\n \x01(\x0b\x32\r.ResourceList\x12\x1d\n\x06series\x18\x0b \x01(\x0b\x32\r.ResourceList\"\xe1\x01\n\x11\x43haracterResponse\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\t\x12\x11\n\tcopyright\x18\x03 \x01(\t\x12\x17\n\x0f\x61ttributionText\x18\x04 \x01(\t\x12\x17\n\x0f\x61ttributionHTML\x18\x05 \x01(\t\x12\x0c\n\x04\x65tag\x18\x06 \x01(\t\x12\x0e\n\x06offset\x18\x07 \x01(\x05\x12\r\n\x05limit\x18\x08 \x01(\x05\x12\r\n\x05total\x18\t \x01(\x05\x12\r\n\x05\x63ount\x18\n \x01(\x05\x12\x1e\n\ncharacters\x18\x0b \x03(\x0b\x32\n.Character\"\x0e\n\x0c\x45mptyRequest\"]\n\x12\x43\x61\x63heStatsResponse\x12\x0c\n\x04hits\x18\x01 \x01(\x05\x12\x0e\n\x06misses\x18\x02 \x01(\x05\x12\x16\n\x0etotal_requests\x18\x03 \x01(\x05\x12\x11\n\thit_ratio\x18\x04 \x01(\x02\x32|\n\rMarvelService\x12\x36\n\rGetCharacters\x12\x11.CharacterRequest\x1a\x12.CharacterResponse\x12\x33\n\rGetCacheStats\x12\r.EmptyRequest\x1a\x13.CacheStatsResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "marvel_pb2", _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'marvel_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-    DESCRIPTOR._loaded_options = None
-    _globals["_CHARACTERREQUEST"]._serialized_start = 16
-    _globals["_CHARACTERREQUEST"]._serialized_end = 80
-    _globals["_URL"]._serialized_start = 82
-    _globals["_URL"]._serialized_end = 114
-    _globals["_IMAGE"]._serialized_start = 116
-    _globals["_IMAGE"]._serialized_end = 156
-    _globals["_COMICSUMMARY"]._serialized_start = 158
-    _globals["_COMICSUMMARY"]._serialized_end = 207
-    _globals["_STORYSUMMARY"]._serialized_start = 209
-    _globals["_STORYSUMMARY"]._serialized_end = 272
-    _globals["_EVENTSUMMARY"]._serialized_start = 274
-    _globals["_EVENTSUMMARY"]._serialized_end = 323
-    _globals["_SERIESSUMMARY"]._serialized_start = 325
-    _globals["_SERIESSUMMARY"]._serialized_end = 375
-    _globals["_RESOURCELIST"]._serialized_start = 378
-    _globals["_RESOURCELIST"]._serialized_end = 578
-    _globals["_CHARACTER"]._serialized_start = 581
-    _globals["_CHARACTER"]._serialized_end = 850
-    _globals["_CHARACTERRESPONSE"]._serialized_start = 853
-    _globals["_CHARACTERRESPONSE"]._serialized_end = 1078
-    _globals["_EMPTYREQUEST"]._serialized_start = 1080
-    _globals["_EMPTYREQUEST"]._serialized_end = 1094
-    _globals["_CACHESTATSRESPONSE"]._serialized_start = 1096
-    _globals["_CACHESTATSRESPONSE"]._serialized_end = 1189
-    _globals["_MARVELSERVICE"]._serialized_start = 1191
-    _globals["_MARVELSERVICE"]._serialized_end = 1315
+  DESCRIPTOR._loaded_options = None
+  _globals['_CHARACTERREQUEST']._serialized_start=17
+  _globals['_CHARACTERREQUEST']._serialized_end=213
+  _globals['_URL']._serialized_start=215
+  _globals['_URL']._serialized_end=247
+  _globals['_IMAGE']._serialized_start=249
+  _globals['_IMAGE']._serialized_end=289
+  _globals['_COMICSUMMARY']._serialized_start=291
+  _globals['_COMICSUMMARY']._serialized_end=340
+  _globals['_STORYSUMMARY']._serialized_start=342
+  _globals['_STORYSUMMARY']._serialized_end=405
+  _globals['_EVENTSUMMARY']._serialized_start=407
+  _globals['_EVENTSUMMARY']._serialized_end=456
+  _globals['_SERIESSUMMARY']._serialized_start=458
+  _globals['_SERIESSUMMARY']._serialized_end=508
+  _globals['_RESOURCELIST']._serialized_start=511
+  _globals['_RESOURCELIST']._serialized_end=711
+  _globals['_CHARACTER']._serialized_start=714
+  _globals['_CHARACTER']._serialized_end=983
+  _globals['_CHARACTERRESPONSE']._serialized_start=986
+  _globals['_CHARACTERRESPONSE']._serialized_end=1211
+  _globals['_EMPTYREQUEST']._serialized_start=1213
+  _globals['_EMPTYREQUEST']._serialized_end=1227
+  _globals['_CACHESTATSRESPONSE']._serialized_start=1229
+  _globals['_CACHESTATSRESPONSE']._serialized_end=1322
+  _globals['_MARVELSERVICE']._serialized_start=1324
+  _globals['_MARVELSERVICE']._serialized_end=1448
 # @@protoc_insertion_point(module_scope)

@@ -2,15 +2,14 @@
 Marvel service for fetching Marvel characters.
 """
 
-import asyncio
+# pylint: disable=no-member
 import logging
-import grpc
 
 from marvel.api import get_marvel_characters
 from marvel.proto import marvel_pb2
 from marvel.proto import marvel_pb2_grpc
 
-from utils.cache import Cache
+from utils.cache import Cache, generate_cache_key
 
 logger = logging.getLogger(__name__)
 
@@ -20,88 +19,79 @@ cache = Cache(maxsize=1000, ttl=300)
 
 class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
     """
-    A service for fetching Marvel characters.
+    Marvel service for fetching Marvel characters.
     """
 
-    def GetCharacters(self, request: marvel_pb2.CharacterRequest, context):
-        cache_key = f"{request.query}:{request.offset}:{request.limit}"
-        cached_result = cache.get(cache_key)
-
-        if cached_result:
-            return cached_result
-
+    def GetCharacters(self, request, context):
+        """
+        Fetch Marvel characters based on the gRPC request parameters.
+        Uses caching to avoid redundant API calls.
+        """
         try:
-            api_response = asyncio.run(
-                get_marvel_characters(
-                    query=request.query, offset=request.offset, limit=request.limit
-                )
-            )
+            # Prepare query parameters from the gRPC request
+            query_params = {
+                "name": request.name,
+                "name_starts_with": request.name_starts_with,
+                "modified_since": request.modified_since,
+                "comics": list(request.comics),
+                "series": list(request.series),
+                "events": list(request.events),
+                "stories": list(request.stories),
+                "order_by": request.order_by,
+                "limit": request.limit,
+                "offset": request.offset,
+            }
 
-            data = api_response.get("data", {})
+            # Generate a cache key based on the parameters
+            cache_key = generate_cache_key(query_params)
 
-            characters = []
+            # Check the cache for a pre-existing response
+            cached_response = cache.get(cache_key)
+            if cached_response:
+                return self._build_response_from_cache(cached_response)
 
-            for result in data.get("results", []):
-                characters.append(
-                    marvel_pb2.Character(
-                        id=result.get("id", 0),
-                        name=result.get("name", ""),
-                        description=result.get("description", ""),
-                        modified=result.get("modified", ""),
-                        resourceURI=result.get("resourceURI", ""),
-                        urls=[
-                            marvel_pb2.Url(type=url["type"], url=url["url"])
-                            for url in result.get("urls", [])
-                        ],
-                        thumbnail=marvel_pb2.Image(
-                            path=result["thumbnail"]["path"],
-                            extension=result["thumbnail"]["extension"],
-                        ),
-                        comics=self._build_resource_list(result.get("comics", {})),
-                        stories=self._build_resource_list(result.get("stories", {})),
-                        events=self._build_resource_list(result.get("events", {})),
-                        series=self._build_resource_list(result.get("series", {})),
-                    )
-                )
+            # Fetch data from the Marvel API
+            api_response = get_marvel_characters(**query_params)
 
-            response = marvel_pb2.CharacterResponse(
-                code=api_response.get("code", 0),
-                status=api_response.get("status", ""),
-                copyright=api_response.get("copyright", ""),
-                attributionText=api_response.get("attributionText", ""),
-                attributionHTML=api_response.get("attributionHTML", ""),
-                etag=api_response.get("etag", ""),
-                offset=data.get("offset", 0),
-                limit=data.get("limit", 0),
-                total=data.get("total", 0),
-                count=data.get("count", 0),
-                characters=characters,
-            )
+            # Cache the response
+            cache.set(cache_key, api_response)
 
-            # Cache the result
-            cache.set(cache_key, response)
-
-            return response
+            # Build the gRPC response
+            return self._build_response_from_api(api_response)
 
         except Exception as e:
-            logger.error("Error fetching characters: %s", e)
             context.set_details(str(e))
-            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_code(marvel_pb2.StatusCode.INTERNAL)
             return marvel_pb2.CharacterResponse()
 
-    def _build_resource_list(self, resource_data):
-        """Helper to build resource lists (e.g., comics, stories)."""
-        return marvel_pb2.ResourceList(
-            available=resource_data.get("available", 0),
-            returned=resource_data.get("returned", 0),
-            collectionURI=resource_data.get("collectionURI", ""),
-            comics=[
-                marvel_pb2.ComicSummary(
-                    resourceURI=item.get("resourceURI", ""), name=item.get("name", "")
-                )
-                for item in resource_data.get("items", [])
-            ],
-        )
+    def _build_response_from_api(self, api_response):
+        """
+        Convert the Marvel API response into a gRPC response format.
+        """
+        characters = [
+            marvel_pb2.Character(
+                id=result.get("id", 0),
+                name=result.get("name", ""),
+                description=result.get("description", ""),
+                thumbnail=(
+                    marvel_pb2.Image(
+                        path=result["thumbnail"]["path"],
+                        extension=result["thumbnail"]["extension"],
+                    )
+                    if result.get("thumbnail")
+                    else None
+                ),
+            )
+            for result in api_response.get("data", {}).get("results", [])
+        ]
+
+        return marvel_pb2.CharacterResponse(characters=characters)
+
+    def _build_response_from_cache(self, cached_response):
+        """
+        Convert cached data into a gRPC response format.
+        """
+        return self._build_response_from_api(cached_response)
 
     def GetCacheStats(self, request, context):
         """

@@ -3,11 +3,13 @@ import marvel.proto.marvel_pb2 as marvel_pb2
 import marvel.proto.marvel_pb2_grpc as marvel_pb2_grpc
 
 
-def fetch_characters(query: str, offset: int, limit: int):
+def fetch_characters(name_starts_with: str, offset: int, limit: int):
     """Fetch Marvel characters using the gRPC client."""
     with grpc.insecure_channel("localhost:50051") as channel:
         stub = marvel_pb2_grpc.MarvelServiceStub(channel)
-        request = marvel_pb2.CharacterRequest(query=query, offset=offset, limit=limit)
+        request = marvel_pb2.CharacterRequest(
+            name=name_starts_with, offset=offset, limit=limit
+        )
         response = stub.GetCharacters(request)
         return response
 
@@ -53,7 +55,7 @@ if __name__ == "__main__":
     limit = int(input("Enter the limit (e.g., 5 or 10): "))
 
     try:
-        response = fetch_characters(query=query, offset=offset, limit=limit)
+        response = fetch_characters(name_starts_with=query, offset=offset, limit=limit)
         display_response(response)
     except grpc.RpcError as e:
         print(f"Error: {e.code()} - {e.details()}")

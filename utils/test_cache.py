@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from utils.cache import Cache
+from utils.cache import Cache, generate_cache_key
 
 
 class TestCache(unittest.TestCase):
@@ -89,6 +89,13 @@ class TestCache(unittest.TestCase):
         self.assertAlmostEqual(
             stats["hit_ratio"], 0.5, msg="Stats - Hit ratio incorrect."
         )
+
+    def test_generate_cache_key(self):
+        """
+        Test that the cache key is generated correctly.
+        """
+        self.assertEqual(generate_cache_key({"a": 1, "b": 2}), "a=1&b=2")
+        self.assertEqual(generate_cache_key({"b": 1, "a": 2}), "a=2&b=1")
 
 
 if __name__ == "__main__":

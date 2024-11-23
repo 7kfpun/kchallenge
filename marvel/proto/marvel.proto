@@ -6,10 +6,18 @@ service MarvelService {
 }
 
 message CharacterRequest {
-  string query = 1; // Filter by character name.
-  int32 offset = 2; // Pagination offset.
-  int32 limit = 3;  // Limit the number of results.
+  string name = 1; // Return only characters matching the specified full name
+  string name_starts_with = 2; // Return characters with names starting with the specified string
+  string modified_since = 3; // Return only characters modified since the specified date (YYYY-MM-DD)
+  repeated int32 comics = 4; // Return only characters appearing in specified comics
+  repeated int32 series = 5; // Return only characters appearing in specified series
+  repeated int32 events = 6; // Return only characters appearing in specified events
+  repeated int32 stories = 7; // Return only characters appearing in specified stories
+  string order_by = 8; // Order results by name, modified, etc.
+  int32 limit = 9; // Limit the number of results returned
+  int32 offset = 10; // Skip the specified number of results
 }
+
 
 message Url {
   string type = 1;

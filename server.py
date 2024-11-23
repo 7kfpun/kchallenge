@@ -1,27 +1,31 @@
-from concurrent import futures
-from dotenv import load_dotenv
-from marvel.proto import marvel_pb2_grpc
-from services.marvel_service import MarvelService
-from utils.logging import configure_logging
+"""
+Marvel gRPC server.
+"""
 
+from concurrent import futures
+
+import logging
 import threading
 import time
-from services.marvel_service import cache
-
 import grpc
-import logging
+import dotenv
+
+from marvel.proto import marvel_pb2_grpc
+from services.marvel_service import MarvelService, cache
+from utils.logging import configure_logging
 
 # Load environment variables
-load_dotenv()
+dotenv.load_dotenv()
 
 # Configure logger
 logger = logging.getLogger(__name__)
 
 
 def log_cache_stats():
+    """Log cache stats."""
     while True:
         stats = cache.stats()
-        print(f"Cache Stats: {stats}")
+        logger.info("Cache Stats: %s", stats)
         time.sleep(10)  # Log every 10 seconds (it should be longer in production)
 
 
@@ -30,6 +34,7 @@ stats_thread.start()
 
 
 def serve():
+    """Serve the gRPC server."""
     configure_logging()
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     marvel_pb2_grpc.add_MarvelServiceServicer_to_server(MarvelService(), server)

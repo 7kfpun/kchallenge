@@ -3,6 +3,7 @@ Cache module for Marvel API.
 """
 
 from collections import OrderedDict
+from urllib.parse import urlencode
 import time
 import logging
 
@@ -91,3 +92,15 @@ class Cache:
         self.hit_count = 0
         self.miss_count = 0
         logger.info("Cache cleared.")
+
+
+def generate_cache_key(params: dict) -> str:
+    """
+    Generate a unique cache key for API caching based on query parameters.
+
+    :param params: Dictionary of query parameters.
+    :return: A unique string representing the cache key.
+    """
+    # Sort parameters to ensure consistent ordering
+    sorted_params = {k: v for k, v in sorted(params.items()) if v is not None}
+    return urlencode(sorted_params, doseq=True)

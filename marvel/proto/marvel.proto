@@ -2,7 +2,6 @@ syntax = "proto3";
 
 service MarvelService {
     rpc GetCharacters(CharacterRequest) returns (CharacterResponse);
-    rpc GetCacheStats(EmptyRequest) returns (CacheStatsResponse);
 }
 
 message CharacterRequest {
@@ -85,13 +84,4 @@ message CharacterResponse {
   int32 total = 9;
   int32 count = 10;
   repeated Character characters = 11;
-}
-
-message EmptyRequest {}
-
-message CacheStatsResponse {
-    int32 hits = 1;
-    int32 misses = 2;
-    int32 total_requests = 3;
-    float hit_ratio = 4;
 }

@@ -106,15 +106,3 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
         Convert cached data into a gRPC response format.
         """
         return self._build_response_from_api(cached_response)
-
-    def GetCacheStats(self, request, context):
-        """
-        Expose cache statistics via gRPC.
-        """
-        stats = cache.stats()
-        return marvel_pb2.CacheStatsResponse(
-            hits=stats["hits"],
-            misses=stats["misses"],
-            total_requests=stats["total_requests"],
-            hit_ratio=stats["hit_ratio"],
-        )

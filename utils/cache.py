@@ -22,6 +22,7 @@ class Cache:
         :param ttl: Time-to-live for cache entries in seconds.
         """
         self.store = OrderedDict()
+        self.etags = {}
         self.maxsize = maxsize
         self.ttl = ttl
         self.hit_count = 0
@@ -29,39 +30,36 @@ class Cache:
 
     def get(self, key: str):
         """
-        Retrieve a value from the cache if it exists and is not expired.
-        Increments hit or miss counters.
+        Get a value from the cache, including its Etag.
         """
         if key in self.store:
             value, timestamp = self.store[key]
             if time.time() - timestamp < self.ttl:
                 self.hit_count += 1
-                self.store.move_to_end(key)
-                logger.info("Cache hit for key: %s", key)
                 return value
 
-            # Remove expired entry
-            del self.store[key]
+            self.store.pop(key)
+            self.etags.pop(key, None)
             self.miss_count += 1
-            logger.info("Cache miss (expired) for key: %s", key)
-            return None
 
         self.miss_count += 1
-        logger.info("Cache miss for key: %s", key)
         return None
 
-    def set(self, key, value):
+    def set(self, key: str, value: dict, etag: str = ""):
         """
         Add or update a value in the cache with the current timestamp.
         Evicts the oldest item if the cache exceeds maxsize.
         """
         if key in self.store:
-            self.store.move_to_end(key)
+            self.store.move_to_end(key)  # Mark as recently accessed
         self.store[key] = (value, time.time())
+        if etag:
+            self.etags[key] = etag
 
         if len(self.store) > self.maxsize:
             # Evict the oldest entry
             evicted_key, _ = self.store.popitem(last=False)
+            self.etags.pop(evicted_key, None)  # Remove the associated Etag
             logger.info("Evicted key: %s", evicted_key)
 
     def keys(self):
@@ -69,6 +67,12 @@ class Cache:
         Return all keys in the cache.
         """
         return list(self.store.keys())
+
+    def get_etag(self, key):
+        """
+        Get the Etag for a cached item.
+        """
+        return self.etags.get(key)
 
     def stats(self):
         """
@@ -89,6 +93,7 @@ class Cache:
         Clear the cache and reset counters.
         """
         self.store.clear()
+        self.etags.clear()
         self.hit_count = 0
         self.miss_count = 0
         logger.info("Cache cleared.")

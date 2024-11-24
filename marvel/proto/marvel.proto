@@ -18,7 +18,6 @@ message CharacterRequest {
   int32 offset = 10; // Skip the specified number of results
 }
 
-
 message Url {
   string type = 1;
   string url = 2;

@@ -2,19 +2,17 @@
 Marvel service for fetching Marvel characters.
 """
 
-# pylint: disable=no-member
+# pylint: disable=no-member,broad-exception-caught
 import logging
 
 from marvel.api import get_marvel_characters
 from marvel.proto import marvel_pb2
 from marvel.proto import marvel_pb2_grpc
+from marvel.cache import cache
 
-from utils.cache import Cache, generate_cache_key
+from utils.cache import generate_cache_key
 
 logger = logging.getLogger(__name__)
-
-# Initialize the custom cache
-cache = Cache(maxsize=1000, ttl=300)
 
 
 class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
@@ -45,16 +43,32 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
             # Generate a cache key based on the parameters
             cache_key = generate_cache_key(query_params)
 
+            # Get the Etag from the cache
+            cached_etag = cache.get_etag(cache_key)
+
+            # Prepare headers
+            headers = {}
+            if cached_etag:
+                headers["If-None-Match"] = cached_etag
+
             # Check the cache for a pre-existing response
             cached_response = cache.get(cache_key)
             if cached_response:
                 return self._build_response_from_cache(cached_response)
 
             # Fetch data from the Marvel API
-            api_response = get_marvel_characters(**query_params)
+            api_response = get_marvel_characters(headers=headers, **query_params)
 
-            # Cache the response
-            cache.set(cache_key, api_response)
+            if api_response.status_code == 304:  # Not Modified
+                cached_data = cache.get(cache_key)
+                return self._build_response_from_cache(cached_data)
+
+            # Handle new data (status code 200)
+            fresh_characters = api_response.get("data", {}).get("results", [])
+            new_etag = api_response.headers.get("Etag")
+
+            # Cache the new data with its Etag
+            cache.set(cache_key, fresh_characters, etag=new_etag)
 
             # Build the gRPC response
             return self._build_response_from_api(api_response)

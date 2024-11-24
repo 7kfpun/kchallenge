@@ -1,6 +1,11 @@
+"""
+Test the Cache class.
+"""
+
 import unittest
 from unittest.mock import patch
 from utils.cache import Cache, generate_cache_key
+from services.marvel_service import MarvelService
 
 
 class TestCache(unittest.TestCase):
@@ -9,6 +14,7 @@ class TestCache(unittest.TestCase):
         Set up a Cache instance before each test.
         """
         self.cache = Cache(maxsize=3, ttl=300)
+        self.service = MarvelService()
 
     def test_set_and_get(self):
         """
@@ -57,6 +63,51 @@ class TestCache(unittest.TestCase):
         )
         self.assertEqual(
             self.cache.miss_count, 1, "Miss count not incremented for expired entry."
+        )
+
+    def test_etag_eviction(self):
+        """
+        Test that Etags are evicted along with their cache entries.
+        """
+        self.cache.set("key1", "value1", etag="etag1")
+        self.cache.set("key2", "value2", etag="etag2")
+        self.cache.set("key3", "value3", etag="etag3")
+        self.cache.set("key4", "value4", etag="etag4")  # Exceeds maxsize
+
+        # Ensure "key1" is evicted
+        self.assertIsNone(
+            self.cache.get("key1"), "Eviction policy failed for cache entry."
+        )
+        self.assertIsNone(
+            self.cache.get_etag("key1"), "Eviction policy failed for Etag."
+        )
+
+    def test_ttl_expiry_for_etag(self):
+        """
+        Test that expired cache entries also remove their Etags.
+        """
+        with unittest.mock.patch("time.time", return_value=1000):
+            self.cache.set("key1", "value1", etag="etag1")
+
+        with unittest.mock.patch("time.time", return_value=1301):  # TTL is 300
+            self.assertIsNone(
+                self.cache.get("key1"), "Expired cache entry should be removed."
+            )
+            self.assertIsNone(
+                self.cache.get_etag("key1"), "Expired Etag should be removed."
+            )
+
+    def test_set_and_get_etag(self):
+        """
+        Test storing and retrieving Etags.
+        """
+        key = "test_key"
+        etag = "etag123"
+        self.cache.set(key, {"data": "test_data"}, etag=etag)
+
+        # Check Etag retrieval
+        self.assertEqual(
+            self.cache.get_etag(key), etag, "Failed to retrieve correct Etag."
         )
 
     def test_clear(self):

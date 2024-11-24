@@ -27,6 +27,7 @@ def generate_hash(ts: str, private_key: str, public_key: str) -> str:
 
 
 def get_marvel_characters(
+    headers: dict = None,
     name: str = None,
     name_starts_with: str = None,
     modified_since: str = None,
@@ -80,6 +81,6 @@ def get_marvel_characters(
         params["orderBy"] = order_by
 
     # Make the request
-    response = httpx.get(MARVEL_API_BASE_URL, params=params)
+    response = httpx.get(MARVEL_API_BASE_URL, params=params, headers=headers)
     response.raise_for_status()
     return response.json()

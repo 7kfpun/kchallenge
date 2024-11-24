@@ -1,3 +1,7 @@
+"""
+Worker: Generic worker to process tasks from a shared queue with retry logic.
+"""
+
 import logging
 import time
 
@@ -6,73 +10,66 @@ logger = logging.getLogger(__name__)
 
 class Worker:
     """
-    Generic worker to process tasks at intervals and handle retries.
+    A worker that processes tasks from a shared queue with retry logic.
     """
 
-    def __init__(self, task_class, retry_limit=3, interval=60):
+    def __init__(self, task_queue, worker_id=1, retry_limit=3):
         """
-        :param task_class: The task class to execute (must implement `execute_task`).
-        :param retry_limit: Maximum retries for a task.
-        :param interval: Time in seconds between task executions.
+        Initialize the worker.
+        :param task_queue: The queue holding tasks to process.
+        :param worker_id: Unique identifier for the worker.
+        :param retry_limit: Number of retries allowed for a task.
         """
-        self.task_class = task_class
+        self.task_queue = task_queue
+        self.worker_id = worker_id
         self.retry_limit = retry_limit
-        self.interval = interval
         self.running = True
 
-    def run(self):
+    def run(self, task_dispatcher):
         """
-        Start the worker process.
+        Continuously fetch and process tasks from the queue.
+        :param task_dispatcher: Function to map task keys to executable functions.
         """
-        logger.info("[Worker] Starting worker for task: %s", self.task_class.__name__)
+        logger.info("[Worker-%d] Starting worker...", self.worker_id)
         while self.running:
-            self.process_tasks()
-            if self.running:  # Check `running` before sleeping
-                logger.info("[Worker] Sleeping for %s seconds...", self.interval)
-                time.sleep(self.interval)
+            if not self.task_queue.empty():
+                task_key = self.task_queue.get()
+                task_function = task_dispatcher(task_key)
+                if task_function:
+                    self._execute_with_retries(task_function, task_key)
+                else:
+                    logger.warning(
+                        "[Worker-%d] No function for task: %s", self.worker_id, task_key
+                    )
+            else:
+                time.sleep(1)
 
-    def process_tasks(self):
+    def _execute_with_retries(self, task_function, task_data):
         """
-        Process all tasks with retry logic or execute single-task actions.
+        Execute a task with retry logic.
+        :param task_function: Function to execute the task.
+        :param task_data: Data for the task to process.
         """
-        if hasattr(self.task_class, "get_tasks"):
-            tasks = self.task_class.get_tasks()
-            for task_key in tasks:
-                self._execute_with_retries(task_key)
-        else:
-            self._execute_with_retries(None)
-
-    def _execute_with_retries(self, task_key):
-        """
-        Execute a task with retries.
-        """
-        retry_count = 0
-        success = False
-
-        while retry_count < self.retry_limit and not success:
-            if not self.running:  # Stop retries if the worker is stopped
-                break
+        for attempt in range(1, self.retry_limit + 1):
             try:
-                self.task_class.execute_task(task_key)
-                success = True
+                task_function(task_data)
+                return
             except Exception as e:
-                retry_count += 1
                 logger.warning(
-                    "[Worker] Retry %s/%s for task %s due to error: %s",
-                    retry_count,
-                    self.retry_limit,
-                    task_key,
+                    "[Worker-%d] Attempt %d failed for task %s: %s",
+                    self.worker_id,
+                    attempt,
+                    task_data,
                     e,
                 )
-
-        if not success and self.running:
-            logger.error(
-                "[Worker] Task %s failed after %s retries.", task_key, self.retry_limit
-            )
+        logger.error(
+            "[Worker-%d] Task %s failed after %d attempts.",
+            self.worker_id,
+            task_data,
+            self.retry_limit,
+        )
 
     def stop(self):
-        """
-        Stop the worker gracefully.
-        """
+        """Stop the worker gracefully."""
         self.running = False
-        logger.info("[Worker] Stopping worker...")
+        logger.info("[Worker-%d] Stopping worker...", self.worker_id)

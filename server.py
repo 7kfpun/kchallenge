@@ -1,5 +1,5 @@
 """
-Marvel gRPC server.
+Marvel gRPC server with worker manager.
 """
 
 from concurrent import futures
@@ -10,22 +10,16 @@ import dotenv
 
 from marvel.proto import marvel_pb2_grpc
 from services.marvel_service import MarvelService
+from utils.manager import WorkerManager
 from tasks.marvel_task import MarvelTask
 from tasks.cache_stats_task import CacheStatsTask
 from utils.logging import configure_logging
-from utils.worker import Worker
 
 # Load environment variables
 dotenv.load_dotenv()
 
 # Configure logger
 logger = logging.getLogger(__name__)
-
-
-def start_worker(task_class, interval):
-    """Start a worker for a specific task."""
-    worker = Worker(task_class=task_class, retry_limit=3, interval=interval)
-    worker.run()
 
 
 def serve():
@@ -43,16 +37,33 @@ def serve():
 
 
 if __name__ == "__main__":
-    # Start workers in separate threads
-    marvel_worker_thread = threading.Thread(
-        target=start_worker, args=(MarvelTask, 60), daemon=True
-    )
-    cache_stats_worker_thread = threading.Thread(
-        target=start_worker, args=(CacheStatsTask, 10), daemon=True
+    # Configure logging
+    configure_logging()
+
+    # Initialize WorkerManager
+    manager = WorkerManager(num_workers=3, interval=10)
+
+    # Register enqueue functions
+    manager.enqueue_functions = [MarvelTask.enqueue_tasks, CacheStatsTask.enqueue_tasks]
+
+    # Define task dispatcher
+    task_dispatcher = lambda task: {
+        "marvel_task": MarvelTask.execute_task,
+        "cache_stats": CacheStatsTask.execute_task,
+    }.get(
+        task["task_name"],
+        lambda _: logger.warning("[Manager] Unknown task: %s", task["task_name"]),
     )
 
-    marvel_worker_thread.start()
-    cache_stats_worker_thread.start()
+    # Start WorkerManager in a separate thread
+    manager_thread = threading.Thread(
+        target=manager.run, args=(task_dispatcher,), daemon=True
+    )
+    manager_thread.start()
 
     # Start gRPC server
-    serve()
+    try:
+        serve()
+    finally:
+        # Stop the manager gracefully
+        manager.stop()

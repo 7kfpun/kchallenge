@@ -39,23 +39,12 @@ class MarvelServiceStub(object):
                 request_serializer=marvel__pb2.CharacterRequest.SerializeToString,
                 response_deserializer=marvel__pb2.CharacterResponse.FromString,
                 _registered_method=True)
-        self.GetCacheStats = channel.unary_unary(
-                '/MarvelService/GetCacheStats',
-                request_serializer=marvel__pb2.EmptyRequest.SerializeToString,
-                response_deserializer=marvel__pb2.CacheStatsResponse.FromString,
-                _registered_method=True)
 
 
 class MarvelServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def GetCharacters(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetCacheStats(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -68,11 +57,6 @@ def add_MarvelServiceServicer_to_server(servicer, server):
                     servicer.GetCharacters,
                     request_deserializer=marvel__pb2.CharacterRequest.FromString,
                     response_serializer=marvel__pb2.CharacterResponse.SerializeToString,
-            ),
-            'GetCacheStats': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetCacheStats,
-                    request_deserializer=marvel__pb2.EmptyRequest.FromString,
-                    response_serializer=marvel__pb2.CacheStatsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -102,33 +86,6 @@ class MarvelService(object):
             '/MarvelService/GetCharacters',
             marvel__pb2.CharacterRequest.SerializeToString,
             marvel__pb2.CharacterResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetCacheStats(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/MarvelService/GetCacheStats',
-            marvel__pb2.EmptyRequest.SerializeToString,
-            marvel__pb2.CacheStatsResponse.FromString,
             options,
             channel_credentials,
             insecure,

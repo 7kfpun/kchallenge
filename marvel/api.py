@@ -2,16 +2,15 @@
 Marvel API module.
 """
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-locals,broad-exception-caught
 
 import hashlib
-import os
 import time
-
-import dotenv
+import os
 import httpx
+from dotenv import load_dotenv
 
-dotenv.load_dotenv()
+load_dotenv()
 
 MARVEL_API_BASE_URL = "https://gateway.marvel.com/v1/public/characters"
 MARVEL_API_PUBLIC_KEY = os.getenv("MARVEL_API_PUBLIC_KEY")
@@ -27,7 +26,6 @@ def generate_hash(ts: str, private_key: str, public_key: str) -> str:
 
 
 def get_marvel_characters(
-    headers: dict = None,
     name: str = None,
     name_starts_with: str = None,
     modified_since: str = None,
@@ -38,6 +36,7 @@ def get_marvel_characters(
     order_by: str = None,
     limit: int = 20,
     offset: int = 0,
+    headers: dict = None,
 ):
     """
     Fetch Marvel characters from the API with support for all available query parameters.
@@ -62,25 +61,23 @@ def get_marvel_characters(
     if modified_since:
         params["modifiedSince"] = modified_since
     if comics:
-        params["comics"] = (
-            ",".join(map(str, comics)) if isinstance(comics, list) else comics
-        )
+        params["comics"] = ",".join(map(str, comics))
     if series:
-        params["series"] = (
-            ",".join(map(str, series)) if isinstance(series, list) else series
-        )
+        params["series"] = ",".join(map(str, series))
     if events:
-        params["events"] = (
-            ",".join(map(str, events)) if isinstance(events, list) else events
-        )
+        params["events"] = ",".join(map(str, events))
     if stories:
-        params["stories"] = (
-            ",".join(map(str, stories)) if isinstance(stories, list) else stories
-        )
+        params["stories"] = ",".join(map(str, stories))
     if order_by:
         params["orderBy"] = order_by
 
-    # Make the request
-    response = httpx.get(MARVEL_API_BASE_URL, params=params, headers=headers)
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = httpx.get(MARVEL_API_BASE_URL, params=params, headers=headers or {})
+        response.raise_for_status()
+        return response
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 304:
+            return e.response  # Return the 304 response for Etag handling
+        raise
+    except Exception as e:
+        raise RuntimeError(f"Error fetching Marvel characters: {e}") from e

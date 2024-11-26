@@ -2,9 +2,10 @@
 WorkerManager: Manages workers and dispatches tasks.
 """
 
+# pylint: disable=broad-exception-caught,no-member
 import threading
 import logging
-import time
+
 from queue import Queue
 from utils.worker import Worker
 

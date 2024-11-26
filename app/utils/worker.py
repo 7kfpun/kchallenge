@@ -2,6 +2,7 @@
 Worker: Generic worker to process tasks from a shared queue with retry logic.
 """
 
+# pylint: disable=broad-exception-caught
 import logging
 import time
 

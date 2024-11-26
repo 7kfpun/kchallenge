@@ -1,69 +1,52 @@
 """
-Marvel gRPC server with worker manager.
+Marvel gRPC server and periodic task execution.
 """
 
-from concurrent import futures
+import asyncio
 import logging
-import threading
+
 import grpc
-import dotenv
+from app.grpc_services.proto.marvel_pb2_grpc import add_MarvelServiceServicer_to_server
+from app.grpc_services.marvel_service import MarvelService
+from app.tasks.marvel_task import enqueue_marvel_tasks
+from app.tasks.cache_stats_task import log_cache_stats
+from app.utils.logging import configure_logging
 
-from marvel.proto import marvel_pb2_grpc
-from services.marvel_service import MarvelService
-from utils.manager import WorkerManager
-from tasks.marvel_task import MarvelTask
-from tasks.cache_stats_task import CacheStatsTask
-from utils.logging import configure_logging
-
-# Load environment variables
-dotenv.load_dotenv()
-
-# Configure logger
 logger = logging.getLogger(__name__)
 
 
-def serve():
-    """Serve the gRPC server."""
-    configure_logging()
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    marvel_pb2_grpc.add_MarvelServiceServicer_to_server(MarvelService(), server)
+async def periodic_task_runner():
+    """
+    Periodically run tasks for cache updates and statistics logging.
+    """
+    while True:
+        logger.info("[Periodic Task] Enqueueing and executing tasks...")
+        await enqueue_marvel_tasks.kiq()
+        await log_cache_stats.kiq()
+        await asyncio.sleep(20)
+
+
+async def start_grpc_server():
+    """
+    Start the gRPC server.
+    """
+    server = grpc.aio.server()
+    add_MarvelServiceServicer_to_server(MarvelService(), server)
     server.add_insecure_port("[::]:50051")
-    logger.info("gRPC server is starting on port 50051")
-    server.start()
-    try:
-        server.wait_for_termination()
-    except KeyboardInterrupt:
-        logger.info("gRPC server is shutting down")
+    await server.start()
+    await server.wait_for_termination()
+
+
+async def main():
+    """
+    Main function to start gRPC server and periodic task runner.
+    """
+    configure_logging()
+    await asyncio.gather(
+        start_grpc_server(),
+        periodic_task_runner(),
+    )
 
 
 if __name__ == "__main__":
-    # Configure logging
-    configure_logging()
-
-    # Initialize WorkerManager
-    manager = WorkerManager(num_workers=3, interval=10)
-
-    # Register enqueue functions
-    manager.enqueue_functions = [MarvelTask.enqueue_tasks, CacheStatsTask.enqueue_tasks]
-
-    # Define task dispatcher
-    task_dispatcher = lambda task: {
-        "marvel_task": MarvelTask.execute_task,
-        "cache_stats": CacheStatsTask.execute_task,
-    }.get(
-        task["task_name"],
-        lambda _: logger.warning("[Manager] Unknown task: %s", task["task_name"]),
-    )
-
-    # Start WorkerManager in a separate thread
-    manager_thread = threading.Thread(
-        target=manager.run, args=(task_dispatcher,), daemon=True
-    )
-    manager_thread.start()
-
-    # Start gRPC server
-    try:
-        serve()
-    finally:
-        # Stop the manager gracefully
-        manager.stop()
+    asyncio.run(main())

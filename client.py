@@ -1,6 +1,11 @@
+"""
+Marvel gRPC client.
+"""
+
+# pylint: disable=no-member
 import grpc
-import marvel.proto.marvel_pb2 as marvel_pb2
-import marvel.proto.marvel_pb2_grpc as marvel_pb2_grpc
+import app.grpc_services.proto.marvel_pb2 as marvel_pb2
+import app.grpc_services.proto.marvel_pb2_grpc as marvel_pb2_grpc
 
 
 def fetch_characters(name_starts_with: str, offset: int, limit: int):
@@ -8,13 +13,12 @@ def fetch_characters(name_starts_with: str, offset: int, limit: int):
     with grpc.insecure_channel("localhost:50051") as channel:
         stub = marvel_pb2_grpc.MarvelServiceStub(channel)
         request = marvel_pb2.CharacterRequest(
-            name=name_starts_with, offset=offset, limit=limit
+            name_starts_with=name_starts_with, offset=offset, limit=limit
         )
-        response = stub.GetCharacters(request)
-        return response
+        return stub.GetCharacters(request)
 
 
-def display_response(response):
+def display_response(response: marvel_pb2.CharacterResponse):
     """Display the response from the server."""
     print(f"Code: {response.code}")
     print(f"Status: {response.status}")

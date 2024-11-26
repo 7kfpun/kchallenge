@@ -1,9 +1,8 @@
 """
-Marvel API module.
+Marvel API module (Async Version).
 """
 
 # pylint: disable=too-many-arguments,too-many-locals,broad-exception-caught
-
 import hashlib
 import time
 import os
@@ -25,7 +24,7 @@ def generate_hash(ts: str, private_key: str, public_key: str) -> str:
     return hashlib.md5(data.encode()).hexdigest()
 
 
-def get_marvel_characters(
+async def get_marvel_characters(
     name: str = None,
     name_starts_with: str = None,
     modified_since: str = None,
@@ -39,7 +38,7 @@ def get_marvel_characters(
     headers: dict = None,
 ):
     """
-    Fetch Marvel characters from the API with support for all available query parameters.
+    Asynchronously fetch Marvel characters from the API.
     """
     ts = str(int(time.time()))
     hash_value = generate_hash(ts, MARVEL_API_PRIVATE_KEY, MARVEL_API_PUBLIC_KEY)
@@ -72,9 +71,12 @@ def get_marvel_characters(
         params["orderBy"] = order_by
 
     try:
-        response = httpx.get(MARVEL_API_BASE_URL, params=params, headers=headers or {})
-        response.raise_for_status()
-        return response
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                MARVEL_API_BASE_URL, params=params, headers=headers or {}
+            )
+            response.raise_for_status()
+            return response
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 304:
             return e.response  # Return the 304 response for Etag handling

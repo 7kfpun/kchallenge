@@ -4,8 +4,8 @@ Test the Cache class.
 
 import unittest
 from unittest.mock import patch
-from utils.cache import Cache, generate_cache_key
-from services.marvel_service import MarvelService
+from app.utils.cache import Cache, generate_cache_key
+from app.grpc_services.marvel_service import MarvelService
 
 
 class TestCache(unittest.TestCase):

@@ -41,6 +41,7 @@ class Cache:
             self.store.pop(key)
             self.etags.pop(key, None)
             self.miss_count += 1
+            return None
 
         self.miss_count += 1
         return None

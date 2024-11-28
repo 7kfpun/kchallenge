@@ -14,6 +14,7 @@ load_dotenv()
 MARVEL_API_BASE_URL = "https://gateway.marvel.com/v1/public/characters"
 MARVEL_API_PUBLIC_KEY = os.getenv("MARVEL_API_PUBLIC_KEY")
 MARVEL_API_PRIVATE_KEY = os.getenv("MARVEL_API_PRIVATE_KEY")
+MARVEL_API_TIMEOUT = float(os.getenv("MARVEL_API_TIMEOUT", "10"))
 
 
 def generate_hash(ts: str, private_key: str, public_key: str) -> str:
@@ -73,7 +74,10 @@ async def get_marvel_characters(
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                MARVEL_API_BASE_URL, params=params, headers=headers or {}
+                MARVEL_API_BASE_URL,
+                params=params,
+                headers=headers or {},
+                timeout=MARVEL_API_TIMEOUT,
             )
             response.raise_for_status()
             return response

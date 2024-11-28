@@ -5,26 +5,23 @@ import warnings
 
 import app.grpc_services.proto.marvel_pb2 as marvel__pb2
 
-GRPC_GENERATED_VERSION = "1.67.1"
+GRPC_GENERATED_VERSION = '1.67.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
 try:
     from grpc._utilities import first_version_is_lower
-
-    _version_not_supported = first_version_is_lower(
-        GRPC_VERSION, GRPC_GENERATED_VERSION
-    )
+    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
 except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
     raise RuntimeError(
-        f"The grpc package installed is at version {GRPC_VERSION},"
-        + f" but the generated code in marvel_pb2_grpc.py depends on"
-        + f" grpcio>={GRPC_GENERATED_VERSION}."
-        + f" Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}"
-        + f" or downgrade your generated code using grpcio-tools<={GRPC_VERSION}."
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + f' but the generated code in marvel_pb2_grpc.py depends on'
+        + f' grpcio>={GRPC_GENERATED_VERSION}.'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
@@ -38,11 +35,10 @@ class MarvelServiceStub(object):
             channel: A grpc.Channel.
         """
         self.GetCharacters = channel.unary_unary(
-            "/MarvelService/GetCharacters",
-            request_serializer=marvel__pb2.CharacterRequest.SerializeToString,
-            response_deserializer=marvel__pb2.CharacterResponse.FromString,
-            _registered_method=True,
-        )
+                '/MarvelService/GetCharacters',
+                request_serializer=marvel__pb2.CharacterRequest.SerializeToString,
+                response_deserializer=marvel__pb2.CharacterResponse.FromString,
+                _registered_method=True)
 
 
 class MarvelServiceServicer(object):
@@ -51,46 +47,43 @@ class MarvelServiceServicer(object):
     def GetCharacters(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_MarvelServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "GetCharacters": grpc.unary_unary_rpc_method_handler(
-            servicer.GetCharacters,
-            request_deserializer=marvel__pb2.CharacterRequest.FromString,
-            response_serializer=marvel__pb2.CharacterResponse.SerializeToString,
-        ),
+            'GetCharacters': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetCharacters,
+                    request_deserializer=marvel__pb2.CharacterRequest.FromString,
+                    response_serializer=marvel__pb2.CharacterResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "MarvelService", rpc_method_handlers
-    )
+            'MarvelService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers("MarvelService", rpc_method_handlers)
+    server.add_registered_method_handlers('MarvelService', rpc_method_handlers)
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class MarvelService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetCharacters(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
+    def GetCharacters(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/MarvelService/GetCharacters",
+            '/MarvelService/GetCharacters',
             marvel__pb2.CharacterRequest.SerializeToString,
             marvel__pb2.CharacterResponse.FromString,
             options,
@@ -101,5 +94,4 @@ class MarvelService(object):
             wait_for_ready,
             timeout,
             metadata,
-            _registered_method=True,
-        )
+            _registered_method=True)

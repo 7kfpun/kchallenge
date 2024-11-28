@@ -1,5 +1,5 @@
 """
-CacheStatsTask: Logs cache statistics at regular intervals.
+Logs cache statistics at regular intervals.
 """
 
 import logging

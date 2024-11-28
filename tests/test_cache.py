@@ -9,6 +9,10 @@ from app.grpc_services.marvel_service import MarvelService
 
 
 class TestCache(unittest.TestCase):
+    """
+    Tests for the Cache class.
+    """
+
     def setUp(self):
         """
         Set up a Cache instance before each test.

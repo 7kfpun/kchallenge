@@ -5,83 +5,83 @@ service MarvelService {
 }
 
 message CharacterRequest {
-  string name = 1; // Return only characters matching the specified full name
-  string name_starts_with = 2; // Return characters with names starting with the specified string
-  string modified_since = 3; // Return only characters modified since the specified date (YYYY-MM-DD)
-  repeated int32 comics = 4; // Return only characters appearing in specified comics
-  repeated int32 series = 5; // Return only characters appearing in specified series
-  repeated int32 events = 6; // Return only characters appearing in specified events
-  repeated int32 stories = 7; // Return only characters appearing in specified stories
-  string order_by = 8; // Order results by name, modified, etc.
-  int32 limit = 9; // Limit the number of results returned
-  int32 offset = 10; // Skip the specified number of results
+    string name = 1; // Return only characters matching the specified full name
+    string name_starts_with = 2; // Return characters with names starting with the specified string
+    string modified_since = 3; // Return only characters modified since the specified date (YYYY-MM-DD)
+    repeated int32 comics = 4; // Return only characters appearing in specified comics
+    repeated int32 series = 5; // Return only characters appearing in specified series
+    repeated int32 events = 6; // Return only characters appearing in specified events
+    repeated int32 stories = 7; // Return only characters appearing in specified stories
+    string order_by = 8; // Order results by name, modified, etc.
+    int32 limit = 9; // Limit the number of results returned
+    int32 offset = 10; // Skip the specified number of results
 }
 
 message Url {
-  string type = 1;
-  string url = 2;
+    string type = 1; // Type of URL (e.g., detail, wiki, comic link)
+    string url = 2; // The URL address
 }
 
 message Image {
-  string path = 1;
-  string extension = 2;
+    string path = 1; // Path to the image
+    string extension = 2; // Image file extension (e.g., jpg, png)
 }
 
 message ComicSummary {
-  string resourceURI = 1;
-  string name = 2;
+    string resourceURI = 1; // URI for the comic resource
+    string name = 2; // Name of the comic
 }
 
 message StorySummary {
-  string resourceURI = 1;
-  string name = 2;
-  string type = 3;
+    string resourceURI = 1; // URI for the story resource
+    string name = 2; // Name of the story
+    string type = 3; // Type of story (e.g., interior, cover)
 }
 
 message EventSummary {
-  string resourceURI = 1;
-  string name = 2;
+    string resourceURI = 1; // URI for the event resource
+    string name = 2; // Name of the event
 }
 
 message SeriesSummary {
-  string resourceURI = 1;
-  string name = 2;
+    string resourceURI = 1; // URI for the series resource
+    string name = 2; // Name of the series
 }
 
 message ResourceList {
-  int32 available = 1;
-  int32 returned = 2;
-  string collectionURI = 3;
-  repeated ComicSummary comics = 4;
-  repeated StorySummary stories = 5;
-  repeated EventSummary events = 6;
-  repeated SeriesSummary series = 7;
+    int32 available = 1; // Total number of available resources
+    int32 returned = 2; // Number of resources returned in this list
+    string collectionURI = 3; // URI to access the full resource collection
+    repeated ComicSummary comics = 4; // Comics in the list
+    repeated StorySummary stories = 5; // Stories in the list
+    repeated EventSummary events = 6; // Events in the list
+    repeated SeriesSummary series = 7; // Series in the list
 }
 
 message Character {
-  int32 id = 1;
-  string name = 2;
-  string description = 3;
-  string modified = 4;
-  string resourceURI = 5;
-  repeated Url urls = 6;
-  Image thumbnail = 7;
-  ResourceList comics = 8;
-  ResourceList stories = 9;
-  ResourceList events = 10;
-  ResourceList series = 11;
+    int32 id = 1; // Unique ID for the character
+    string name = 2; // Name of the character
+    string description = 3; // Description of the character
+    string modified = 4; // Last modified date (ISO 8601 format)
+    string resourceURI = 5; // URI for the character resource
+    repeated Url urls = 6; // Related URLs
+    Image thumbnail = 7; // Thumbnail image of the character
+    ResourceList comics = 8; // Comics the character appears in
+    ResourceList stories = 9; // Stories the character appears in
+    ResourceList events = 10; // Events the character appears in
+    ResourceList series = 11; // Series the character appears in
 }
 
 message CharacterResponse {
-  int32 code = 1;
-  string status = 2;
-  string copyright = 3;
-  string attributionText = 4;
-  string attributionHTML = 5;
-  string etag = 6;
-  int32 offset = 7;
-  int32 limit = 8;
-  int32 total = 9;
-  int32 count = 10;
-  repeated Character characters = 11;
+    int32 code = 1; // HTTP status code of the response
+    string status = 2; // Status message
+    string copyright = 3; // Copyright information
+    string attributionText = 4; // Attribution text
+    string attributionHTML = 5; // Attribution HTML
+    string etag = 6; // ETag of the response
+    int32 offset = 7; // Starting offset of the response
+    int32 limit = 8; // Limit applied to the response
+    int32 total = 9; // Total number of available resources
+    int32 count = 10; // Number of results returned
+    repeated Character characters = 11; // List of characters in the response
 }

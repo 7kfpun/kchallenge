@@ -4,7 +4,6 @@ Marvel service for fetching Marvel characters.
 
 # pylint: disable=no-member,broad-exception-caught
 import logging
-import asyncio
 
 from app.api.marvel_api import get_marvel_characters
 from app.grpc_services.proto import marvel_pb2
@@ -25,7 +24,6 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
         Fetch Marvel characters based on the gRPC request parameters.
         Uses caching to avoid redundant API calls.
         """
-        # Prepare query parameters from the gRPC request
         query_params = {
             "name": request.name,
             "name_starts_with": request.name_starts_with,
@@ -39,23 +37,14 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
             "offset": request.offset,
         }
 
-        # Generate a cache key based on the parameters
         cache_key = generate_cache_key(query_params)
-
-        # Get the Etag from the cache
         cached_etag = cache.get_etag(cache_key)
+        headers = {"If-None-Match": cached_etag} if cached_etag else {}
 
-        # Prepare headers
-        headers = {}
-        if cached_etag:
-            headers["If-None-Match"] = cached_etag
-
-        # Check the cache for a pre-existing response
         cached_response = cache.get(cache_key)
         if cached_response:
             return self._build_response_from_cache(cached_response)
 
-        # Fetch data from the Marvel API asynchronously
         try:
             response = await get_marvel_characters(headers=headers, **query_params)
 
@@ -63,20 +52,16 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
                 cached_data = cache.get(cache_key)
                 return self._build_response_from_cache(cached_data)
 
-            api_response = response.json()
+            response_data = response.json()
 
-            # Handle new data (status code 200)
             new_etag = response.headers.get("Etag")
+            cache.set(cache_key, response_data, etag=new_etag)
 
-            # Cache the new data with its Etag
-            cache.set(cache_key, api_response, etag=new_etag)
-
-            # Build the gRPC response
-            return self._build_response_from_api(api_response)
+            return self._build_response_from_api(response_data)
 
         except Exception as e:
             logger.error("[MarvelService] Error fetching characters: %s", e)
-            context.set_code(marvel_pb2.StatusCode.INTERNAL)
+            context.set_code(context.Code.INTERNAL)
             context.set_details("Failed to fetch characters.")
             return marvel_pb2.CharacterResponse()
 

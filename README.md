@@ -42,3 +42,14 @@ Run tests with:
 ```bash
 python3 -m unittest discover tests
 ```
+
+## Docker Setup
+
+1. Prerequisites
+	Docker
+	Docker Compose
+
+2. Run Container
+```bash
+docker-compose up
+```

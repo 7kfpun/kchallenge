@@ -19,9 +19,9 @@ def fetch_characters(name_starts_with: str, offset: int, limit: int):
         display_response(response)
 
 
-def stream_updates(name_starts_with: str, offset: int, limit: int):
+def stream_updates(name_starts_with: str, offset: int, limit: int, timeout: int = 60):
     """
-    Subscribe to Marvel character updates for a specific query using gRPC streaming.
+    Subscribe to Marvel character updates for a specific query using gRPC streaming with a timeout.
     """
     with grpc.insecure_channel("localhost:50051") as channel:
         stub = marvel_pb2_grpc.MarvelServiceStub(channel)
@@ -29,11 +29,17 @@ def stream_updates(name_starts_with: str, offset: int, limit: int):
             name_starts_with=name_starts_with, offset=offset, limit=limit
         )
         try:
-            for response in stub.StreamUpdates(request):
-                print("Received an update for your query:")
-                display_response(response)
+            responses = stub.StreamUpdates(request, timeout=timeout)
+            for response in responses:
+                if response:
+                    print("Received an update:")
+                    display_response(response)
+                else:
+                    print("No updates received.")
         except grpc.RpcError as e:
             print(f"Streaming error: {e.code()} - {e.details()}")
+        except TimeoutError:
+            print("Streaming timeout reached, disconnecting.")
 
 
 def display_response(response: marvel_pb2.CharacterResponse):

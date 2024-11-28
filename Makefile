@@ -19,7 +19,6 @@ build:  ## Build
 proto:  ## Generate proto
 	python3 -m grpc_tools.protoc -I app/grpc_services/proto --python_out=app/grpc_services/proto --grpc_python_out=app/grpc_services/proto app/grpc_services/proto/marvel.proto
 	sed -i '' 's/import marvel_pb2 as/import app.grpc_services.proto.marvel_pb2 as/' app/grpc_services/proto/marvel_pb2_grpc.py
-	# sed -i '' 's/import marvel_pb2 as/import app.grpc_services.proto.marvel_pb2 as/' app/grpc_services/proto/marvel_pb2.py
 
 lint:  ## Lint
 	autoflake --exclude venv --in-place --remove-all-unused-imports --remove-duplicate-keys --remove-unused-variables **/*.py

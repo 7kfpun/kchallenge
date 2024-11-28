@@ -24,9 +24,6 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
     Marvel service for fetching Marvel characters with streaming updates.
     """
 
-    def __init__(self):
-        self.subscribers = set()
-
     async def GetCharacters(self, request, context):
         """
         Fetch Marvel characters based on the gRPC request parameters.

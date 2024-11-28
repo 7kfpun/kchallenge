@@ -26,7 +26,7 @@ async def enqueue_marvel_tasks():
     try:
         # Fetch all cache keys
         all_keys = list(cache.store.keys())
-        logger.info("[MarvelTask] Found %d cache keys to enqueue.", len(all_keys))
+        logger.debug("[MarvelTask] Found %d cache keys to enqueue.", len(all_keys))
 
         # Enqueue tasks for each key
         for cache_key in all_keys:

@@ -11,8 +11,8 @@ from app.api.cache import cache
 from app.api.marvel_api import get_marvel_characters
 from app.grpc_services.proto import marvel_pb2
 from app.utils.character_response_utils import build_character_response
+from app.utils.stream_manager import StreamManager
 from app.workers.broker import broker
-from app.workers.stream_manager import StreamManager
 
 logger = logging.getLogger(__name__)
 stream_manager = StreamManager()

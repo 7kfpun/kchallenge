@@ -3,6 +3,7 @@ Marvel service for fetching Marvel characters.
 """
 
 import logging
+import grpc
 
 from app.api.marvel_api import get_marvel_characters
 from app.grpc_services.proto import marvel_pb2
@@ -18,7 +19,9 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
     Marvel service for fetching Marvel characters.
     """
 
-    async def GetCharacters(self, request, context):
+    async def GetCharacters(
+        self, request: marvel_pb2.CharacterRequest, context: grpc.ServicerContext
+    ) -> marvel_pb2.CharacterResponse:
         """
         Fetch Marvel characters based on the gRPC request parameters.
         Uses caching to avoid redundant API calls.
@@ -70,7 +73,7 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
             context.set_details("Failed to fetch characters.")
             return marvel_pb2.CharacterResponse()
 
-    def _build_response_from_api(self, api_response):
+    def _build_response_from_api(self, api_response: dict):
         """
         Convert the Marvel API response into a gRPC response format.
         """
@@ -153,7 +156,7 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
             characters=characters,
         )
 
-    def _build_response_from_cache(self, cached_response):
+    def _build_response_from_cache(self, cached_response: dict):
         """
         Convert cached data into a gRPC response format.
         """

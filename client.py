@@ -37,18 +37,34 @@ def display_response(response: marvel_pb2.CharacterResponse):
         print(
             f"  Thumbnail: {character.thumbnail.path}.{character.thumbnail.extension}"
         )
+
         print("  Comics:")
-        for comic in character.comics.comics:
-            print(f"    - {comic.name}")
+        if character.comics.comics:
+            for comic in character.comics.comics:
+                print(f"    - {comic.name}")
+        else:
+            print("    None")
+
         print("  Stories:")
-        for story in character.stories.stories:
-            print(f"    - {story.name} ({story.type})")
+        if character.stories.stories:
+            for story in character.stories.stories:
+                print(f"    - {story.name} ({story.type})")
+        else:
+            print("    None")
+
         print("  Events:")
-        for event in character.events.events:
-            print(f"    - {event.name}")
+        if character.events.events:
+            for event in character.events.events:
+                print(f"    - {event.name}")
+        else:
+            print("    None")
+
         print("  Series:")
-        for series in character.series.series:
-            print(f"    - {series.name}")
+        if character.series.series:
+            for series in character.series.series:
+                print(f"    - {series.name}")
+        else:
+            print("    None")
         print("\n")
 
 

@@ -58,7 +58,6 @@ async def enqueue_marvel_tasks():
     """
     Enqueue all Marvel-related cache keys into the Taskiq queue.
     """
-    logger.info("[MarvelTask] Enqueuing tasks...")
     all_keys = list(cache.store.keys())
     for cache_key in all_keys:
         await update_marvel_cache.kiq(cache_key)

@@ -20,7 +20,7 @@ async def periodic_task_runner():
     Periodically run tasks for cache updates and statistics logging.
     """
     while True:
-        logger.info("[Periodic Task] Enqueueing and executing tasks...")
+        logger.debug("[Periodic Task] Enqueueing and executing tasks...")
         await enqueue_marvel_tasks.kiq()
         await log_cache_stats.kiq()
         await asyncio.sleep(20)

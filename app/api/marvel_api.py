@@ -2,7 +2,7 @@
 Marvel API module (Async Version).
 """
 
-# pylint: disable=too-many-arguments,too-many-locals,broad-exception-caught
+# pylint: disable=too-many-arguments,too-many-locals
 import hashlib
 import time
 import os

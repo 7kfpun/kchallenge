@@ -62,8 +62,10 @@ class MarvelService(marvel_pb2_grpc.MarvelServiceServicer):
             cache.set(cache_key, response_data, etag=new_etag)
 
             # Notify all subscribers about the update
-            await self._notify_subscribers(
-                cache_key, build_character_response(response_data)
+            asyncio.create_task(
+                self._notify_subscribers(
+                    cache_key, build_character_response(response_data)
+                )
             )
 
             return build_character_response(response_data)

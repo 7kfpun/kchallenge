@@ -6,7 +6,7 @@ import asyncio
 import unittest
 from unittest.mock import patch
 
-from app.api.cache import cache
+from app.cache import cache
 from app.tasks.cache_stats_task import log_cache_stats
 
 

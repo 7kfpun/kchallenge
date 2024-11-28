@@ -4,7 +4,7 @@ Logs cache statistics at regular intervals.
 
 import logging
 
-from app.api.cache import cache
+from app.cache import cache
 from app.workers.broker import broker
 
 logger = logging.getLogger(__name__)

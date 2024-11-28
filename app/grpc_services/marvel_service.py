@@ -7,9 +7,9 @@ import asyncio
 import logging
 
 from app.api.marvel_api import get_marvel_characters
+from app.cache import cache
 from app.grpc_services.proto import marvel_pb2
 from app.grpc_services.proto import marvel_pb2_grpc
-from app.api.cache import cache
 from app.utils.cache import generate_cache_key
 from app.utils.character_response_utils import build_character_response
 from app.utils.stream_manager import StreamManager

@@ -4,8 +4,8 @@ Tests for the Marvel task.
 
 import unittest
 from unittest.mock import AsyncMock, patch, MagicMock
+from app.cache import cache
 from app.tasks.marvel_task import update_marvel_cache, enqueue_marvel_tasks
-from app.api.cache import cache
 
 
 class TestMarvelTask(unittest.IsolatedAsyncioTestCase):

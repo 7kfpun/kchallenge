@@ -74,18 +74,22 @@ def build_resource_list(resource_data, resource_type):
             "series": marvel_pb2.SeriesSummary,
         }
 
-        summaries = [
-            summary_class[resource_type](
-                resourceURI=item.get("resourceURI", ""),
-                name=item.get("name", ""),
-                type=item.get("type", "") if resource_type == "stories" else None,
-            )
-            for item in resource_data.get("items", [])
-        ]
+        summaries = []
+        for item in resource_data.get("items", []):
+            summary_kwargs = {
+                "resourceURI": item.get("resourceURI", ""),
+                "name": item.get("name", ""),
+            }
+
+            # Only add "type" field for stories
+            if resource_type == "stories":
+                summary_kwargs["type"] = item.get("type", "")
+
+            summaries.append(summary_class[resource_type](**summary_kwargs))
 
         return marvel_pb2.ResourceList(
             available=resource_data.get("available", 0),
-            returned=resource_data.get("returned", 0),
+            returned=len(summaries),
             collectionURI=resource_data.get("collectionURI", ""),
             **{resource_type: summaries},
         )

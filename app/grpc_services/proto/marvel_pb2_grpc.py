@@ -39,6 +39,11 @@ class MarvelServiceStub(object):
                 request_serializer=marvel__pb2.CharacterRequest.SerializeToString,
                 response_deserializer=marvel__pb2.CharacterResponse.FromString,
                 _registered_method=True)
+        self.StreamUpdates = channel.unary_stream(
+                '/MarvelService/StreamUpdates',
+                request_serializer=marvel__pb2.CharacterRequest.SerializeToString,
+                response_deserializer=marvel__pb2.CharacterResponse.FromString,
+                _registered_method=True)
 
 
 class MarvelServiceServicer(object):
@@ -50,11 +55,22 @@ class MarvelServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def StreamUpdates(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_MarvelServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetCharacters': grpc.unary_unary_rpc_method_handler(
                     servicer.GetCharacters,
+                    request_deserializer=marvel__pb2.CharacterRequest.FromString,
+                    response_serializer=marvel__pb2.CharacterResponse.SerializeToString,
+            ),
+            'StreamUpdates': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamUpdates,
                     request_deserializer=marvel__pb2.CharacterRequest.FromString,
                     response_serializer=marvel__pb2.CharacterResponse.SerializeToString,
             ),
@@ -84,6 +100,33 @@ class MarvelService(object):
             request,
             target,
             '/MarvelService/GetCharacters',
+            marvel__pb2.CharacterRequest.SerializeToString,
+            marvel__pb2.CharacterResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamUpdates(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/MarvelService/StreamUpdates',
             marvel__pb2.CharacterRequest.SerializeToString,
             marvel__pb2.CharacterResponse.FromString,
             options,

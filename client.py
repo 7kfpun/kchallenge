@@ -1,24 +1,45 @@
 """
-Marvel gRPC client.
+Marvel gRPC client with query-specific streaming updates.
 """
 
-# pylint: disable=no-member
 import grpc
 from app.grpc_services.proto import marvel_pb2, marvel_pb2_grpc
 
 
 def fetch_characters(name_starts_with: str, offset: int, limit: int):
-    """Fetch Marvel characters using the gRPC client."""
+    """
+    Fetch Marvel characters using the gRPC client.
+    """
     with grpc.insecure_channel("localhost:50051") as channel:
         stub = marvel_pb2_grpc.MarvelServiceStub(channel)
         request = marvel_pb2.CharacterRequest(
             name_starts_with=name_starts_with, offset=offset, limit=limit
         )
-        return stub.GetCharacters(request)
+        response = stub.GetCharacters(request)
+        display_response(response)
+
+
+def stream_updates(name_starts_with: str, offset: int, limit: int):
+    """
+    Subscribe to Marvel character updates for a specific query using gRPC streaming.
+    """
+    with grpc.insecure_channel("localhost:50051") as channel:
+        stub = marvel_pb2_grpc.MarvelServiceStub(channel)
+        request = marvel_pb2.CharacterRequest(
+            name_starts_with=name_starts_with, offset=offset, limit=limit
+        )
+        try:
+            for response in stub.StreamUpdates(request):
+                print("Received an update for your query:")
+                display_response(response)
+        except grpc.RpcError as e:
+            print(f"Streaming error: {e.code()} - {e.details()}")
 
 
 def display_response(response: marvel_pb2.CharacterResponse):
-    """Display the response from the server."""
+    """
+    Display the response from the server.
+    """
     print(f"Code: {response.code}")
     print(f"Status: {response.status}")
     print(f"Copyright: {response.copyright}")
@@ -37,44 +58,38 @@ def display_response(response: marvel_pb2.CharacterResponse):
         print(
             f"  Thumbnail: {character.thumbnail.path}.{character.thumbnail.extension}"
         )
-
         print("  Comics:")
-        if character.comics.comics:
-            for comic in character.comics.comics:
-                print(f"    - {comic.name}")
-        else:
-            print("    None")
-
+        for comic in character.comics.comics:
+            print(f"    - {comic.name}")
         print("  Stories:")
-        if character.stories.stories:
-            for story in character.stories.stories:
-                print(f"    - {story.name} ({story.type})")
-        else:
-            print("    None")
-
+        for story in character.stories.stories:
+            print(f"    - {story.name} ({story.type})")
         print("  Events:")
-        if character.events.events:
-            for event in character.events.events:
-                print(f"    - {event.name}")
-        else:
-            print("    None")
-
+        for event in character.events.events:
+            print(f"    - {event.name}")
         print("  Series:")
-        if character.series.series:
-            for series in character.series.series:
-                print(f"    - {series.name}")
-        else:
-            print("    None")
+        for series in character.series.series:
+            print(f"    - {series.name}")
         print("\n")
 
 
 if __name__ == "__main__":
-    query = input("Enter a character name (or part of it) to search: ")
-    offset = int(input("Enter the offset (start at 0): "))
-    limit = int(input("Enter the limit (e.g., 5 or 10): "))
+    print("Choose an option:")
+    print("1. Fetch Characters")
+    print("2. Subscribe to Updates")
 
-    try:
-        response = fetch_characters(name_starts_with=query, offset=offset, limit=limit)
-        display_response(response)
-    except grpc.RpcError as e:
-        print(f"Error: {e.code()} - {e.details()}")
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        query = input("Enter a character name (or part of it) to search: ")
+        offset = int(input("Enter the offset (start at 0): "))
+        limit = int(input("Enter the limit (e.g., 5 or 10): "))
+        fetch_characters(query, offset, limit)
+    elif choice == "2":
+        query = input("Enter a character name (or part of it) to stream updates: ")
+        offset = int(input("Enter the offset (start at 0): "))
+        limit = int(input("Enter the limit (e.g., 5 or 10): "))
+        print("Subscribing to updates for your query...")
+        stream_updates(query, offset, limit)
+    else:
+        print("Invalid choice.")

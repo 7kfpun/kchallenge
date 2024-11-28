@@ -2,6 +2,7 @@ syntax = "proto3";
 
 service MarvelService {
     rpc GetCharacters(CharacterRequest) returns (CharacterResponse);
+    rpc StreamUpdates(CharacterRequest) returns (stream CharacterResponse);
 }
 
 message CharacterRequest {

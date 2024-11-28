@@ -4,8 +4,7 @@ Marvel gRPC client.
 
 # pylint: disable=no-member
 import grpc
-import app.grpc_services.proto.marvel_pb2 as marvel_pb2
-import app.grpc_services.proto.marvel_pb2_grpc as marvel_pb2_grpc
+from app.grpc_services.proto import marvel_pb2, marvel_pb2_grpc
 
 
 def fetch_characters(name_starts_with: str, offset: int, limit: int):
